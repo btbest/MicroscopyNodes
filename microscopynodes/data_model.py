@@ -70,7 +70,8 @@ def _validate_axis_order(value, allowed, field_name):
 class ChannelDataModel(BaseModel):
     dataset_resolution: int # currently static resolution identifier 
 
-    ix: int # channel index in the original array used as unique identifier for the dataset TODO abstract this inot the ix in the dataset?
+    ix: int  # unique channel slot in the Blender dataset
+    source_channel_index: int | None = None  # unset for single-image imports, where the indices agree
     axes_order: str # removes channel axis - optional later: make xarray?
     source_axes_order: str | None = None
     mask_path: str | None = None
@@ -120,7 +121,7 @@ class ChannelDataModel(BaseModel):
 
             self._data_cache = da.take(
                 self._source_array,
-                indices=self.ix,
+                indices=self.ix if self.source_channel_index is None else self.source_channel_index,
                 axis=channel_axis,
             )
         return self._data_cache
